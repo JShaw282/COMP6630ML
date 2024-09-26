@@ -1,0 +1,16 @@
+Convert to NeurIPS format for submission < Word format discountinued? use old format
+2-3 pages
+
+Abstract:
+
+Introduction:
+
+Background:
+
+Methodology:
+
+Dataset:
+
+Conclusion:
+
+References:
