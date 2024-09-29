@@ -1,0 +1,7 @@
+Can we use TensorFlow?
+
+Her link for overleaf does not work. I found the template and attempted to edit it - whenever you edit authors it does not seem to update on overleaf and can't get rid of bottom part "subbmitted to " requires more research.
+
+See if you can figure it out. I've put the current format in here, as well as how it loads in PDF format. 
+
+I'll look at it some more tomorrow after I study some for Forensics and perhaps try and create a timeline graph.

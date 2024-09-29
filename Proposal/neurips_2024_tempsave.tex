@@ -1,0 +1,116 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2024
+
+
+% ready for submission
+\usepackage{neurips_2024}
+
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2024}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2024}
+
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2024}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+
+\title{ToyBox (Computer Vision)}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+\author{%
+  Jonathan Pitts 
+  Department of Computer Science
+  Auburn University
+  Auburn, AL 
+  \texttt{jzp0062@auburn.edu} 
+  \And
+  Jackson Shaw 
+  Department of Computer Science 
+  Auburn University 
+  Auburn, AL 
+  \texttt{shaw@auburn.edu}
+}
+
+
+\begin{document}
+\nolinenumbers
+
+
+\maketitle
+
+
+\begin{abstract}
+  This research project aims to develop and evaluate a computer vision model and compare the model to that of one trained on a single frame viewpoint. The project will utilize the ToyBox dataset to see how well various angles can improve training compared to a dataset of front viewpoints. 
+\end{abstract}
+
+
+\section{Project Design}
+
+
+This project plans to utilize the multi-view video from the ToyBox dataset to train a machine learning model to classify toys. The idea is that given the multiple perspectives from a “human” view, the model should result in a better trained model than that of a dataset containing only images. Our primary project is to have an enhanced model over that of an imaged trained model such that the model is able to more accurately generalize new samples given the varying perspectives of the objects. To do this we will create a model in Python to evaluate both the video format and a single frame from each video. We will then compare the models using various metrics such as accuracy, confusion matrix, and F1 score.
+
+
+\section{Dataset Details}
+
+
+The dataset for this project is a video dataset of children’s toys. Unlike most classification projects which contain an image, this dataset is a video that includes multiple viewpoints of each toy. While this data contains 12 categories broken down into 3 sets (household items, animals, and vehicles) our initial testing will focus primarily on the animals dataset. Both due to the complexity of the video dataset, and size of the dataset. The size of the animals dataset is 36.9 GB compressed for instance. The animal dataset has 4 types of animals: duck, cat, horse, giraffe.  Additionally, the video is high resolution at 1080p and appears to have good focus which will enhance the training of our model. Time permitting we will expand our testing to the other datasets.
+
+
+\section{Software}
+
+
+We will use python for fundamental coding of our project and rely on various libraries. For basic data plotting and graph purposes we will make use of the Matplotlib library. Matplotlib is a great tool for data visualization and will enable us to display data in a report friendly way. For array functions and manipulation we will make use of the NumPy library as used in previous work during this class.  OpenCV will be used for the integration of video formats from the dataset provided by ToyBox, this will save us significant time converting video to usable information. Git/Github will be used for version/project management and for coordinating our coding efforts. Lastly, TensorFlow will be used as a ML Framework.
+
+
+\section{Planned Analysis}
+
+For our analysis we will compare our model trained on a video set of human viewpoint, but single frame photos to compare accuracy.  We will also compare different amounts of training data. 
+
+
+\section{Teammates}
+
+This project will have two teammates: Jackson Shaw and Jonathan Pitts. While we have not determined a split on the workload, once we establish our fundamental functions and their requirements, we will begin to split them up. 
+
+
+\section{Tentative Timeline}
+
+Tentatively our project will have 4 phases. During our first phase "Basic Model Outline Creation" we will focus on the outline of our code and what functions need to be created for functionality of our project. From there we will complete the coding base to achieve a working model. During the next phase, "Complete Training for Video / Photo", we will complete any remaining coding and ensure the models are training and able to predict based on the dataset. From there we will evaluate the video from the single frame model to compare their performance. Lastly we will put all this information together in our final report to share our results.
+
+Oct 1, 2024 - Oct 18, 2024 for "Basic Model Outline Creation"
+
+Oct 18, 2024 - Oct 31, 2024 for "Complete Training for Video / Photo"
+
+Oct 31, 2024 - Nov 15, 2024 for "Evaluate Models"
+
+Nov 15, 2024 - Dec 1, 2024 for "Complete Final Report"
+
+
+\end{document}
