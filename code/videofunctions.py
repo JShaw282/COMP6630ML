@@ -26,14 +26,5 @@ def GetFrame(filename, framenum):
         return frame
     else:
         return None
-    
-
-# test Frame count function
-print(FrameCount("testvideo.mp4"))
-frame = GetFrame("testvideo.mp4", 40)
-
-# test get specific frame from video
-cv2.imshow('Frame', frame)
-cv2.waitKey(0)
-
+   
 
