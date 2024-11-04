@@ -3,3 +3,6 @@ code/binary_video_classification_model.h5
 code/neg/
 code/pos/
 code/test-images/
+animals.tar.gz
+animals
+.gitignore
