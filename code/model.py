@@ -6,6 +6,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, models, regularizers
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
+import gc
 # test Frame count function
 #print(FrameCount("testvideo.mp4"))
 #frame = GetFrame("testvideo.mp4", 40)
@@ -14,20 +15,29 @@ from tqdm import tqdm
 #cv2.imshow('Frame', frame)
 #cv2.waitKey(0)
 def preprocess_image(image_path, target_size=(224, 224)):
-    # Read the image
     img = cv2.imread(image_path)
     if img is None:
         print(f"Error: Could not read image at {image_path}")
         return None
     
-    # Convert BGR to RGB (OpenCV uses BGR by default)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # Add background subtractor
+    bg_subtractor = cv2.createBackgroundSubtractorMOG2(
+        history=500, 
+        varThreshold=16, 
+        detectShadows=False
+    )
     
-    # Resize the image
+    # Apply background subtraction
+    fg_mask = bg_subtractor.apply(img)
+    fg_mask = cv2.GaussianBlur(fg_mask, (5, 5), 0)
+    fg_mask = (fg_mask > 128).astype(np.float32)
+    
     img = cv2.resize(img, target_size)
-    
-    # Normalize pixel values
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img.astype(np.float32) / 255.0
+    
+    # Apply mask to foreground
+    img *= np.expand_dims(fg_mask, -1)
     
     return img
 
@@ -68,7 +78,7 @@ def process_image_folder(model, folder_path):
     
     return results
 
-def extract_frames(video_path, n_frames=30):  # Increased number of frames
+def extract_frames(video_path, n_frames=10):
     frames = []
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -76,6 +86,13 @@ def extract_frames(video_path, n_frames=30):  # Increased number of frames
     if total_frames == 0:
         cap.release()
         return np.array(frames)
+    
+    # Add background subtractor
+    bg_subtractor = cv2.createBackgroundSubtractorMOG2(
+        history=500, 
+        varThreshold=16, 
+        detectShadows=False
+    )
     
     n_frames = min(n_frames, total_frames)
     step = max(1, total_frames // n_frames)
@@ -85,19 +102,28 @@ def extract_frames(video_path, n_frames=30):  # Increased number of frames
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_pos)
         ret, frame = cap.read()
         if ret:
-            # Add basic preprocessing
             frame = cv2.resize(frame, (224, 224))
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert to RGB
-            # Add data augmentation
+            
+            # Apply background subtraction
+            fg_mask = bg_subtractor.apply(frame)
+            fg_mask = cv2.GaussianBlur(fg_mask, (5, 5), 0)
+            fg_mask = (fg_mask > 128).astype(np.float32)
+            
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame = frame.astype(np.float32) / 255.0
+            
+            # Apply mask to foreground
+            frame *= np.expand_dims(fg_mask, -1)
+            
             if np.random.random() > 0.5:
-                frame = cv2.flip(frame, 1)  # Random horizontal flip
-            frame = frame / 255.0  # Normalize
+                frame = cv2.flip(frame, 1)
+                
             frames.append(frame)
     
     cap.release()
     return np.array(frames)
 
-def load_data(positive_dir, negative_dir, batch_size=1000):
+def load_data(positive_dir, negative_dir, batch_size=16):
     """
     Load video frames in batches to manage memory usage.
 
@@ -131,6 +157,7 @@ def load_data(positive_dir, negative_dir, batch_size=1000):
                             yield np.array(X_batch), np.array(y_batch)
                             X_batch = []
                             y_batch = []
+                            gc.collect()
 
                 except Exception as e:
                     print(f"Error processing {video_path}: {str(e)}")
@@ -143,10 +170,12 @@ def load_data(positive_dir, negative_dir, batch_size=1000):
     # Process positive examples
     for X_pos, y_pos in process_directory(positive_dir, label=1):
         yield X_pos, y_pos
+        gc.collect()
 
     # Process negative examples
     for X_neg, y_neg in process_directory(negative_dir, label=0):
         yield X_neg, y_neg
+        gc.collect()
 
 '''
 def load_data(positive_dir, negative_dir):
@@ -240,7 +269,7 @@ def train_model(X_train, y_train, X_test, y_test):
     history = model.fit(
         X_train, y_train,
         epochs=50,  # Increase epochs, EarlyStopping will prevent overfitting
-        batch_size=32,
+        batch_size=16,
         validation_split=0.2,
         callbacks=callbacks,
         shuffle=True
@@ -280,6 +309,7 @@ def predict_video(model, video_path):
 positive_dir = 'pos'
 negative_dir = 'neg'
 
+'''
 X, y = load_data(positive_dir, negative_dir)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
@@ -291,7 +321,7 @@ model = create_model(input_shape)
 #              loss='binary_crossentropy',
 #              metrics=['accuracy'])
 
-for batch_idx, (X_batch, y_batch) in enumerate(load_date(positive_dir, negative_dir)):
+for batch_idx, (X_batch, y_batch) in enumerate(load_data(positive_dir, negative_dir)):
     model.train_on_batch(X_batch, y_batch)
 
     if batch_idx % 10 == 0:
@@ -301,6 +331,31 @@ for batch_idx, (X_batch, y_batch) in enumerate(load_date(positive_dir, negative_
 
 test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
 print(f'\nTest accuracy: {test_acc}')
+
+# Save the model
+model.save('binary_video_classification_model.h5')
+
+'''
+
+# Replace with:
+positive_dir = 'pos'
+negative_dir = 'neg'
+input_shape = (224, 224, 3)
+
+# Create and compile model once
+model = create_model(input_shape)
+model.compile(optimizer='adam',
+             loss='binary_crossentropy',
+             metrics=['accuracy'])
+
+# Train with generator
+print("Starting training...")
+for epoch in range(25):
+    print(f"\nEpoch {epoch+1}/25")
+    for batch_idx, (X_batch, y_batch) in enumerate(load_data(positive_dir, negative_dir)):
+        loss = model.train_on_batch(X_batch, y_batch)
+        if batch_idx % 10 == 0:
+            print(f"Batch {batch_idx}: loss = {loss[0]:.4f}, accuracy = {loss[1]:.4f}")
 
 # Save the model
 model.save('binary_video_classification_model.h5')
